@@ -75,7 +75,7 @@ session_check(data){
 
   render() {
     return (
-        <div class="center">
+        <div class="centerpage">
         <MuiThemeProvider>
           <div>
           <AppBar

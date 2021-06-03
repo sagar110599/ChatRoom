@@ -18,7 +18,9 @@ export default class JoinRoom extends Component {
       
 
     };
-    
+    fetch("/api/check_session")
+        .then((response) => response.json())
+        .then((data) => this.session_check(data));
 
     this.join_room= this.join_room.bind(this);
     this.handleroomcode= this.handleroomcode.bind(this);
@@ -38,7 +40,16 @@ export default class JoinRoom extends Component {
     });
   }
 
-
+  session_check(data){
+    if(data['session']){
+      this.setState({
+        userName: data['user_name'],
+      });
+    }else{
+      window.location.href = "/login";
+    }
+    
+  }
 
   join_room() {
       if (this.state.password==''){

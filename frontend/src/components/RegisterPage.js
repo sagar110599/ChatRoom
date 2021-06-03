@@ -72,7 +72,7 @@ view_response(data){
 
   render() {
     return (
-        <div class="center">
+        <div class="centerpage">
         <MuiThemeProvider>
           <div>
           <AppBar

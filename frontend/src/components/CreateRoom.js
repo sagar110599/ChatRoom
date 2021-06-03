@@ -18,7 +18,9 @@ export default class CreateRoom extends Component {
       
 
     };
-    
+    fetch("/api/check_session")
+        .then((response) => response.json())
+        .then((data) => this.session_check(data));
 
     this.create_room = this.create_room.bind(this);
     this.handlecapacity= this.handlecapacity.bind(this);
@@ -68,6 +70,16 @@ view_response(data){
     alert(`Room Code:${data['room_name']} Password :${data['pass']} Please Remember Them.`);
   }else{
       alert("Invalid Username Password");
+  }
+  
+}
+session_check(data){
+  if(data['session']){
+    this.setState({
+      userName: data['user_name'],
+    });
+  }else{
+    window.location.href = "/login";
   }
   
 }

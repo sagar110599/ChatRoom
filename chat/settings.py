@@ -70,9 +70,9 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'chat.wsgi.application'
 ASGI_APPLICATION = 'chat.routing.application'
+WSGI_APPLICATION = 'chat.wsgi.application'
+
 
 CHANNEL_LAYERS = {
     "default": {
