@@ -15,7 +15,7 @@ Including another URLconf
 """
 
 from django.urls import path
-from .views import Register,Login,Check_Session,Create_room,Join_room,Delete_session
+from .views import Register,Login,Check_Session,Create_room,Join_room,Delete_session,Check_Session_Room,Room_Size
 
 urlpatterns = [
     path('register', Register.as_view()),
@@ -23,5 +23,7 @@ urlpatterns = [
     path('check_session',Check_Session.as_view()),
     path('create-room',Create_room.as_view()),
     path('join-room',Join_room.as_view()),
-    path('delete_session',Delete_session.as_view())
+    path('delete_session',Delete_session.as_view()),
+    path('check-room-session',Check_Session_Room.as_view()),
+    path('increase-room-size',Room_Size.as_view())
 ]

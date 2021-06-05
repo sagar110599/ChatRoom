@@ -28,14 +28,17 @@ class Room(models.Model):
     code = models.CharField(max_length=8, default=generate_unique_code, unique=True)
     password=models.CharField(max_length=50)
     members=models.IntegerField(default=1)
+    host=models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    expired=models.DateTimeField(auto_now_add=True)
+    def get_room_created_at(self):
+        return self.created_at
     def get_room_code(self):
         return self.code
-    def reduce_memebers(self):
+    def reduce_members(self):
         print(self.code,self.password,self.members)
-        temp=self.members-1
-        self.members=temp
-        print(self.members)    
+        self.members=self.members-1
+        self.save()    
 
 class User(models.Model):
     username=models.CharField(max_length=50, unique=True)

@@ -43,6 +43,7 @@ export default class CreateRoom extends Component {
 
 
   create_room() {
+      if(this.state.max_strength>0){
       if (this.state.password==''){
           alert("Password cannot be null");
       }else if(this.state.password=="0"){
@@ -63,6 +64,9 @@ export default class CreateRoom extends Component {
         .then((data) => this.view_response(data));
     
 }
+      }else{
+        alert("Room size should be greater than 0")
+      }
   }
 view_response(data){
   console.log(data)
@@ -102,7 +106,7 @@ session_check(data){
               onChange={this.handlecapacity}
               defaultValue="1"
               inputProps={{
-                min: 1,
+                min: 0,
                 style: { textAlign: "center" },
               }}
             />

@@ -18,18 +18,24 @@ export default class Room extends Component {
       text_data:'',
       userName:'',
       text_from_server:'',
+      ishost:false,
+      size:0,
+      roomCode:this.props.match.params.room_code,
       
 
     };
-    fetch("/api/check_session")
+    
+    fetch("/api/check-room-session?code="+this.state.roomCode)
         .then((response) => response.json())
         .then((data) => this.session_check(data));
-    this.roomCode = this.props.match.params.room_code;
-    this.client = new W3CWebSocket('ws://127.0.0.1:8000/ws/frontend/room/'+this.roomCode);
+    
+    this.client = new W3CWebSocket('ws://127.0.0.1:8000/ws/frontend/room/'+this.state.roomCode);
     this.handletext = this.handletext.bind(this);
     this.senddata = this.senddata.bind(this);
     this.handlefile=this.handlefile.bind(this);
-   
+   this.closeRoom=this.closeRoom.bind(this);
+   this.increaseSize=this.increaseSize.bind(this);
+   this.handleroomsize=this.handleroomsize.bind(this);
     
     
   }
@@ -50,7 +56,13 @@ export default class Room extends Component {
       }
       document.querySelector(".mytext").value="";
     };
+    this.client.onclose=()=>{
+console.log("Room Closed");
+alert("Refresh To Again start Chatting")
+    };
 }
+
+
 handlefile(e){
 
 var file = e.target.files[0];
@@ -70,18 +82,54 @@ reader.onload = (event)=> {
 
 reader.readAsDataURL(file);
 }
+
+increaseSize(){
+  if(this.state.size>0){
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      room:this.state.roomCode,
+      strength: this.state.size,
+      
+    }),
+  };
+  fetch("/api/increase-room-size", requestOptions)
+    .then((response) => response.json())
+    .then((data) => this.view_response(data));
+}else{
+alert("Invalid Room Size");
+}
+}
+view_response(data){
+  if(data['response']){
+    alert("Size Increased");
+  }else{
+    alert("Could Not Update Size");
+  }
+}
 handletext(e) {
   this.setState({
     text_data: e.target.value,
   });
 }
+
+handleroomsize(e) {
+  
+  this.setState({
+    size: e.target.value,
+  });
+
+}
+
 session_check(data){
   if(data['session']){
     this.setState({
       userName: data['user_name'],
+      ishost:data['host'],
     });
   }else{
-    window.location.href = "/login";
+    window.location.href = "/join_room";
   }
   
 }
@@ -109,6 +157,15 @@ senddata() {
     type:'text'
   })); 
   
+  
+}
+closeRoom(){
+  this.client.send(JSON.stringify({
+    message: "Exited the Room",
+    username: this.state.userName,
+    type:'text'
+  })); 
+  this.client.close();
   
 }
 triggerFile(){
@@ -188,6 +245,9 @@ insertChat(who, text, time,by,type){
     
       
 return (
+  <div class="container">
+  <div class="row">
+   
   <div class="center"><div class="col-sm-3 col-sm-offset-4 frame">
   <ul></ul>
   <div>
@@ -207,21 +267,44 @@ return (
       </div>                
   </div>
 </div> 
-
+</div> 
 </div>
- /* <div class="center">
-      <textarea id="chat-log" cols="100" rows="20"/><br/>
-      <input id="chat" type="text" onChange={this.handletext} size="100"/><br/>
-      <button onClick={this.Senddata}>SEND</button><br/>
-      {/* <div class="image-upload">
-    <label for="file-input">
-        <img src="data:image/png;base64,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"/>
-    </label>
+<br/><br/>
+{this.state.ishost?(
+<div class="container">
+<Grid item xs={11} align="center">
+<FormControl>
+            <TextField
+              required={true}
+              type="number"
+              onChange={this.handleroomsize}
+              defaultValue=""
+              inputProps={{
+                min: 0,
+                style: { textAlign: "center" },
+              }}
+            />
+            <FormHelperText>
+              <div align="center">Increase Room Size By</div>
+            </FormHelperText>
+            <Button color="secondary" variant="contained" onClick={this.increaseSize}>
+            Increase
+          </Button>
+          </FormControl>
+        </Grid>
+        <br/>
+        <br/>
+        
+</div>):''}
+<Grid item xs={11} align="center">
+          <Button color="secondary" variant="contained" onClick={this.closeRoom}>
+            Exit Room
+          </Button>
+        </Grid>
+</div>
 
-    <input id="file-input" onChange={this.handlefile} type="file"/>
-</div> }</div>  */
+
    
     );
 }
-  
 }
