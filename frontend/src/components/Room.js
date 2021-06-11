@@ -21,6 +21,7 @@ export default class Room extends Component {
       ishost:false,
       size:0,
       roomCode:this.props.match.params.room_code,
+      fileName:'',
       
 
     };
@@ -67,11 +68,17 @@ handlefile(e){
 
 var file = e.target.files[0];
 var reader = new FileReader();
+
+this.setState({
+  fileName: file.name,
+});
+console.log(file.name);
 reader.onload = (event)=> {
   var yesno=confirm("Click Ok To Send the File. Sending takes time so be patient");
+  
   if(yesno){
     this.client.send(JSON.stringify({
-      message: event.target.result,
+      message: this.state.fileName+"#"+event.target.result,
       username: this.state.userName,
       type:'non-text'}))
   }else{
@@ -134,9 +141,11 @@ session_check(data){
   
 }
 dataurltofile(dataURI){
+  var filename=dataURI.split("#")[0];
+  dataURI=dataURI.split("#")[1];
   var BASE64_MARKER = ';base64,';
   var mime = (dataURI.split(BASE64_MARKER)[0]).split(':')[1];
-      var filename = 'file-' + (new Date()).getTime() + '.' + mime.split('/')[1];
+      
       var bytes = atob(dataURI.split(BASE64_MARKER)[1]);
       var writer = new Uint8Array(new ArrayBuffer(bytes.length));
 
@@ -214,7 +223,7 @@ insertChat(who, text, time,by,type){
                     '<div class="msj macro">' +
                     '<div class="avatar">You</div>' +
                         '<div class="text text-l">' +
-                            '<a  href="'+this.dataurltofile(text)+'" target="_blank">download</a>' +
+                            '<a  href="'+this.dataurltofile(text)+'" target="_blank">'+(text.split("#")[0]).substring(0,20)+'</a>' +
                             '<p><small>'+date+'</small></p>' +
                         '</div>' +
                     '</div>' +
@@ -223,7 +232,7 @@ insertChat(who, text, time,by,type){
     control = '<li style="width:100%;">' +
                     '<div class="msj-rta macro">' +
                         '<div class="text text-r">' +
-                            '<a  href="'+this.dataurltofile(text)+'" target="_blank">download</a>' +
+                            '<a  href="'+this.dataurltofile(text)+'" target="_blank">'+(text.split("#")[0]).substring(0,20)+'</a>' +
                             '<p><small>'+date+'</small></p>' +
                         '</div>' +
                     '<div class="avatar">From: '+by+'  </div></div>' +                                
